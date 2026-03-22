@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import {
   Leaf, Zap, Microscope, CloudUpload, FlaskConical,
-  RefreshCw, FileImage, XCircle, Code, ChevronDown,
-  Activity, Copy, Check, Wifi, WifiOff, Loader
+  RefreshCw, FileImage, XCircle,
+  Activity, Wifi, WifiOff, Loader
 } from 'lucide-react'
 import './App.css'
 
@@ -44,43 +44,6 @@ const DISEASE_CONFIG = {
   },
 }
 
-const CODE_TABS = [
-  {
-    label: 'cURL',
-    lang: 'bash',
-    code: `curl -X POST ${API_BASE}/predict \\
-  -F "image=@/path/to/daun.jpg"`,
-  },
-  {
-    label: 'JavaScript',
-    lang: 'js',
-    code: `const formData = new FormData();
-formData.append('image', fileInput.files[0]);
-
-const res = await fetch('${API_BASE}/predict', {
-  method: 'POST',
-  body: formData,
-});
-
-const data = await res.json();
-// { class, confidence, all_predictions }`,
-  },
-  {
-    label: 'Python',
-    lang: 'python',
-    code: `import requests
-
-with open('daun.jpg', 'rb') as f:
-    res = requests.post(
-        '${API_BASE}/predict',
-        files={'image': f}
-    )
-
-print(res.json())
-# {'class': 'Early Blight', 'confidence': '94.27%', ...}`,
-  },
-]
-
 /* ─── Sub-components ─── */
 
 function HealthIndicator({ status }) {
@@ -97,40 +60,6 @@ function HealthIndicator({ status }) {
   )
 }
 
-function CodeBlock({ tabs }) {
-  const [active, setActive] = useState(0)
-  const [copied, setCopied] = useState(false)
-
-  const copy = () => {
-    navigator.clipboard.writeText(tabs[active].code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  return (
-    <div className="code-block">
-      <div className="code-topbar">
-        <div className="code-tabs">
-          {tabs.map((t, i) => (
-            <button
-              key={i}
-              className={`code-tab ${active === i ? 'active' : ''}`}
-              onClick={() => setActive(i)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <button className="copy-btn" onClick={copy}>
-          {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy</>}
-        </button>
-      </div>
-      <pre className="code-pre">
-        <code>{tabs[active].code}</code>
-      </pre>
-    </div>
-  )
-}
 
 function ConfidenceBar({ label, value, color, isTop }) {
   const [w, setW] = useState(0)
@@ -186,7 +115,6 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
-  const [showCode, setShowCode] = useState(false)
   const fileRef = useRef()
   const resultRef = useRef()
 
@@ -270,7 +198,6 @@ export default function App() {
           <nav className="header-nav">
             <HealthIndicator status={apiStatus} />
             <a href="#scan" className="nav-link">Deteksi</a>
-            <a href="#docs" className="nav-link">API Docs</a>
           </nav>
         </div>
       </header>
@@ -469,113 +396,6 @@ export default function App() {
               </div>
             )}
           </div>
-        </div>
-      </section>
-
-      {/* ── API Documentation ── */}
-      <section className="docs-section" id="docs">
-        <div className="section-eyebrow">Integrasi API</div>
-        <h2 className="section-h2">Dokumentasi Endpoint</h2>
-
-        <div className="base-url-bar">
-          <span className="bub-label">Base URL</span>
-          <code className="bub-url">{API_BASE}</code>
-          <HealthIndicator status={apiStatus} />
-        </div>
-
-        <div className="endpoint-list">
-          {/* GET / */}
-          <div className="endpoint-item">
-            <div className="ep-top">
-              <span className="ep-method get">GET</span>
-              <code className="ep-path">/</code>
-              <span className="ep-desc">Health check — cek status server</span>
-            </div>
-            <div className="ep-body">
-              <div className="ep-col">
-                <h5>Response 200</h5>
-                <pre className="ep-pre">{`{
-  "status": "✅ Server berjalan!",
-  "message": "Potato Disease Detection API (Node.js + ONNX)"
-}`}</pre>
-              </div>
-            </div>
-          </div>
-
-          {/* POST /predict */}
-          <div className="endpoint-item">
-            <div className="ep-top">
-              <span className="ep-method post">POST</span>
-              <code className="ep-path">/predict</code>
-              <span className="ep-desc">Deteksi penyakit dari foto daun kentang</span>
-            </div>
-            <div className="ep-body">
-              <div className="ep-col">
-                <h5>Request — multipart/form-data</h5>
-                <table className="ep-table">
-                  <thead>
-                    <tr><th>Field</th><th>Tipe</th><th>Keterangan</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><code>image</code></td>
-                      <td>file</td>
-                      <td>JPG/PNG, maks 5 MB</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div className="ep-col">
-                <h5>Response 200</h5>
-                <pre className="ep-pre">{`{
-  "class": "Early Blight",
-  "confidence": "94.27%",
-  "all_predictions": {
-    "Early Blight": "94.27%",
-    "Late Blight": "4.51%",
-    "Healthy": "1.22%"
-  }
-}`}</pre>
-              </div>
-            </div>
-          </div>
-
-          {/* Errors */}
-          <div className="endpoint-item">
-            <div className="ep-top">
-              <span className="ep-method err">4xx / 5xx</span>
-              <code className="ep-path">Error Responses</code>
-            </div>
-            <div className="ep-body">
-              <div className="ep-col full">
-                <table className="ep-table">
-                  <thead>
-                    <tr><th>Status</th><th>Kondisi</th><th>Response</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>400</td><td>Tidak ada gambar</td><td><code>{`{"detail":"Tidak ada gambar yang diunggah."}`}</code></td></tr>
-                    <tr><td>400</td><td>Format bukan JPG/PNG</td><td><code>{`{"detail":"Hanya file JPG/PNG yang diizinkan."}`}</code></td></tr>
-                    <tr><td>400</td><td>File &gt; 5MB</td><td><code>{`{"detail":"Ukuran file melebihi batas 5MB."}`}</code></td></tr>
-                    <tr><td>500</td><td>Gagal proses model</td><td><code>{`{"detail":"Gagal memproses gambar: ..."}`}</code></td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Code examples */}
-        <div className="code-examples">
-          <button className="code-toggle" onClick={() => setShowCode(!showCode)}>
-            <Code size={15} />
-            <span>Contoh Kode</span>
-            <ChevronDown size={15} className={`chev ${showCode ? 'open' : ''}`} />
-          </button>
-          {showCode && (
-            <div className="code-panel">
-              <CodeBlock tabs={CODE_TABS} />
-            </div>
-          )}
         </div>
       </section>
 
