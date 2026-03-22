@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import {
-  Leaf, Zap, Microscope, CloudUpload, FlaskConical,
-  RefreshCw, FileImage, XCircle,
-  Activity, Wifi, WifiOff, Loader
+  Leaf, Zap, CloudUpload, FlaskConical, RefreshCw,
+  FileImage, XCircle, Activity, Loader,
+  ArrowRight, CheckCircle2, AlertTriangle, AlertOctagon,
+  ChevronRight, Cpu, Shield,
 } from 'lucide-react'
 import './App.css'
 
@@ -10,66 +11,62 @@ const API_BASE = 'https://node-js-potato-be-e7k2.vercel.app'
 
 const DISEASE_CONFIG = {
   Healthy: {
-    color: '#4ade80',
-    glow: 'rgba(74, 222, 128, 0.35)',
-    bg: 'rgba(74, 222, 128, 0.07)',
-    border: 'rgba(74, 222, 128, 0.3)',
+    color: '#10b981',
+    glow: 'rgba(16,185,129,0.28)',
+    bg: 'rgba(16,185,129,0.08)',
+    border: 'rgba(16,185,129,0.22)',
     severity: 'safe',
-    emoji: '🌿',
+    Icon: CheckCircle2,
     label: 'Daun Sehat',
     desc: 'Tanaman kentang dalam kondisi optimal. Tidak ditemukan indikasi penyakit pada daun.',
     action: 'Pertahankan kondisi perawatan saat ini.',
   },
   'Early Blight': {
-    color: '#fbbf24',
-    glow: 'rgba(251, 191, 36, 0.35)',
-    bg: 'rgba(251, 191, 36, 0.07)',
-    border: 'rgba(251, 191, 36, 0.3)',
+    color: '#f59e0b',
+    glow: 'rgba(245,158,11,0.28)',
+    bg: 'rgba(245,158,11,0.08)',
+    border: 'rgba(245,158,11,0.22)',
     severity: 'warning',
-    emoji: '⚠️',
+    Icon: AlertTriangle,
     label: 'Bercak Daun Awal',
     desc: 'Disebabkan oleh jamur Alternaria solani. Muncul bercak coklat gelap berbentuk target pada daun.',
     action: 'Gunakan fungisida berbasis tembaga. Buang daun yang terinfeksi segera.',
   },
   'Late Blight': {
-    color: '#f87171',
-    glow: 'rgba(248, 113, 113, 0.35)',
-    bg: 'rgba(248, 113, 113, 0.07)',
-    border: 'rgba(248, 113, 113, 0.3)',
+    color: '#ef4444',
+    glow: 'rgba(239,68,68,0.28)',
+    bg: 'rgba(239,68,68,0.08)',
+    border: 'rgba(239,68,68,0.22)',
     severity: 'danger',
-    emoji: '🚨',
+    Icon: AlertOctagon,
     label: 'Busuk Daun',
     desc: 'Disebabkan oleh Phytophthora infestans. Penyakit paling destruktif pada kentang, menyebar sangat cepat.',
     action: 'Tindakan darurat diperlukan. Isolasi tanaman dan gunakan fungisida sistemik.',
   },
 }
 
-/* ─── Sub-components ─── */
-
-function HealthIndicator({ status }) {
+/* ─── StatusBadge ─── */
+function StatusBadge({ status }) {
   return (
-    <div className={`health-indicator status-${status}`}>
-      {status === 'online' ? (
-        <><Wifi size={13} /><span>API Online</span></>
-      ) : status === 'checking' ? (
-        <><Loader size={13} className="spin" /><span>Connecting…</span></>
-      ) : (
-        <><WifiOff size={13} /><span>API Offline</span></>
-      )}
+    <div className={`status-badge st-${status}`}>
+      {status === 'checking'
+        ? <Loader size={11} className="spin" />
+        : <span className="st-dot" />}
+      <span>
+        {status === 'online' ? 'API Online' : status === 'checking' ? 'Connecting…' : 'API Offline'}
+      </span>
     </div>
   )
 }
 
-
+/* ─── ConfidenceBar ─── */
 function ConfidenceBar({ label, value, color, isTop }) {
   const [w, setW] = useState(0)
   const pct = parseFloat(value)
-
   useEffect(() => {
     const t = setTimeout(() => setW(pct), 120)
     return () => clearTimeout(t)
   }, [pct])
-
   return (
     <div className={`conf-row ${isTop ? 'is-top' : ''}`}>
       <div className="conf-label-wrap">
@@ -77,36 +74,97 @@ function ConfidenceBar({ label, value, color, isTop }) {
         <span className="conf-name">{label}</span>
       </div>
       <div className="conf-track">
-        <div
-          className="conf-fill"
-          style={{ width: `${w}%`, background: color, boxShadow: `0 0 8px ${color}` }}
-        />
+        <div className="conf-fill" style={{ width: `${w}%`, background: color, boxShadow: `0 0 8px ${color}55` }} />
       </div>
       <span className="conf-val" style={{ color }}>{value}</span>
     </div>
   )
 }
 
-function ScanRings() {
+/* ─── HeroVisual — dashboard mockup card ─── */
+function HeroVisual() {
   return (
-    <div className="scan-rings" aria-hidden="true">
-      <div className="ring r1" />
-      <div className="ring r2" />
-      <div className="ring r3" />
-      <div className="ring r4" />
-      <div className="scan-core">
-        <Microscope size={52} />
+    <div className="hero-visual">
+      {/* floating chips */}
+      <div className="hv-chip hv-chip-1">
+        <CheckCircle2 size={13} />
+        <span>Confidence 94.2%</span>
       </div>
-      <div className="scan-sweep" />
-      <div className="scan-cross">
-        <div className="sc-h" /><div className="sc-v" />
+      <div className="hv-chip hv-chip-2">
+        <Zap size={13} />
+        <span>Response &lt; 1s</span>
+      </div>
+
+      <div className="hv-card">
+        {/* window chrome */}
+        <div className="hv-chrome">
+          <div className="hv-dots">
+            <span /><span /><span />
+          </div>
+          <span className="hv-chrome-title">TaterScan · Analysis Engine</span>
+          <div className="hv-live">
+            <span className="hv-pulse" />
+            Live
+          </div>
+        </div>
+
+        {/* body */}
+        <div className="hv-body">
+          {/* left: leaf preview + scan */}
+          <div className="hv-preview-col">
+            <div className="hv-img-wrap">
+              <Leaf size={38} />
+              <div className="hv-scan-line" />
+            </div>
+            <div className="hv-img-label">daun_kentang.jpg</div>
+          </div>
+
+          {/* right: metrics + bars */}
+          <div className="hv-metrics">
+            <div className="hv-row">
+              <span className="hv-key">Model</span>
+              <span className="hv-val">EfficientNet-B0</span>
+            </div>
+            <div className="hv-row">
+              <span className="hv-key">Runtime</span>
+              <span className="hv-val">ONNX · 48ms</span>
+            </div>
+            <div className="hv-row">
+              <span className="hv-key">Input</span>
+              <span className="hv-val">300 × 300 px</span>
+            </div>
+            <div className="hv-sep" />
+            <div className="hv-result-label">Distribusi Prediksi</div>
+            {[
+              { name: 'Healthy', pct: 82, color: '#10b981' },
+              { name: 'E. Blight', pct: 12, color: '#f59e0b' },
+              { name: 'L. Blight', pct: 6,  color: '#ef4444' },
+            ].map(r => (
+              <div key={r.name} className="hv-bar-row">
+                <span className="hv-bar-name">{r.name}</span>
+                <div className="hv-bar">
+                  <div className="hv-bar-fill" style={{ width: `${r.pct}%`, background: r.color }} />
+                </div>
+                <span className="hv-bar-pct" style={{ color: r.color }}>{r.pct}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* result footer */}
+        <div className="hv-footer">
+          <div className="hv-result-chip">
+            <CheckCircle2 size={13} />
+            <span>Healthy — Daun Sehat</span>
+          </div>
+          <span className="hv-conf">94.2% confidence</span>
+        </div>
       </div>
     </div>
   )
 }
 
 /* ─── Main App ─── */
-
 export default function App() {
   const [apiStatus, setApiStatus] = useState('checking')
   const [dragging, setDragging] = useState(false)
@@ -118,14 +176,12 @@ export default function App() {
   const fileRef = useRef()
   const resultRef = useRef()
 
-  /* Health check */
   useEffect(() => {
     fetch(`${API_BASE}/`)
       .then(r => setApiStatus(r.ok ? 'online' : 'offline'))
       .catch(() => setApiStatus('offline'))
   }, [])
 
-  /* File handler */
   const handleFile = (f) => {
     if (!f) return
     if (!['image/jpeg', 'image/png'].includes(f.type)) {
@@ -148,7 +204,6 @@ export default function App() {
     handleFile(e.dataTransfer.files[0])
   }, [])
 
-  /* Predict */
   const predict = async () => {
     if (!file) return
     setLoading(true)
@@ -180,221 +235,276 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* Atmospheric background layers */}
-      <div className="bg-grid" aria-hidden="true" />
-      <div className="bg-glow glow-top" aria-hidden="true" />
-      <div className="bg-glow glow-mid" aria-hidden="true" />
+      {/* ── Backgrounds ── */}
+      <div className="dot-bg" aria-hidden="true" />
+      <div className="orb orb-1" aria-hidden="true" />
+      <div className="orb orb-2" aria-hidden="true" />
+      <div className="orb orb-3" aria-hidden="true" />
 
       {/* ── Header ── */}
       <header className="header">
         <div className="header-inner">
           <div className="logo">
-            <div className="logo-mark">
-              <Leaf size={18} />
-            </div>
+            <div className="logo-icon"><Leaf size={16} /></div>
             <span className="logo-name">TaterScan</span>
-            <span className="logo-tag">v1.0</span>
+            <span className="logo-ver">v1.0</span>
           </div>
           <nav className="header-nav">
-            <HealthIndicator status={apiStatus} />
+            <a href="#penyakit" className="nav-link">Penyakit</a>
             <a href="#scan" className="nav-link">Deteksi</a>
+            <StatusBadge status={apiStatus} />
+            <a href="#scan" className="btn-nav">
+              Mulai Analisis <ArrowRight size={14} />
+            </a>
           </nav>
         </div>
       </header>
 
       {/* ── Hero ── */}
       <section className="hero">
-        <div className="hero-text">
-          <div className="hero-eyebrow">
-            <Zap size={11} />
-            <span>EfficientNet · ONNX Runtime · Vercel Serverless</span>
-          </div>
-          <h1 className="hero-h1">
-            Diagnosis Penyakit<br />
-            <em>Daun Kentang</em><br />
-            Berbasis AI
-          </h1>
-          <p className="hero-p">
-            Upload foto daun kentang dan dapatkan diagnosis instan dengan
-            model deep learning EfficientNet — deteksi tiga kelas penyakit
-            secara akurat dalam hitungan detik.
-          </p>
-          <div className="hero-meta">
-            <div className="meta-item">
-              <span className="meta-val">3</span>
-              <span className="meta-key">Kelas</span>
+        <div className="hero-inner">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Zap size={12} />
+              <span>EfficientNet · ONNX Runtime · Vercel Serverless</span>
             </div>
-            <div className="meta-sep" />
-            <div className="meta-item">
-              <span className="meta-val">300×300</span>
-              <span className="meta-key">Input</span>
-            </div>
-            <div className="meta-sep" />
-            <div className="meta-item">
-              <span className="meta-val">5 MB</span>
-              <span className="meta-key">Maks. Ukuran</span>
-            </div>
-          </div>
-          <a href="#scan" className="cta-btn">
-            <CloudUpload size={16} />
-            Mulai Analisis
-          </a>
-        </div>
-        <div className="hero-visual">
-          <ScanRings />
-        </div>
-      </section>
-
-      {/* ── Disease Classes ── */}
-      <section className="diseases-section">
-        <div className="section-eyebrow">Kelas yang Dapat Dideteksi</div>
-        <div className="disease-grid">
-          {Object.entries(DISEASE_CONFIG).map(([key, d]) => (
-            <div
-              key={key}
-              className={`disease-card sev-${d.severity}`}
-              style={{ '--dc': d.color, '--dg': d.glow }}
-            >
-              <div className="dc-emoji">{d.emoji}</div>
-              <div className="dc-body">
-                <h3 className="dc-name">{key}</h3>
-                <p className="dc-label">{d.label}</p>
-                <p className="dc-desc">{d.desc}</p>
+            <h1 className="hero-h1">
+              Diagnosis <em>Penyakit Daun</em><br />
+              Kentang Berbasis AI
+            </h1>
+            <p className="hero-p">
+              Upload foto daun kentang dan dapatkan diagnosis instan dengan model deep learning
+              EfficientNet — deteksi tiga kelas penyakit secara akurat dalam hitungan detik.
+            </p>
+            <div className="hero-stats">
+              <div className="h-stat">
+                <span className="h-stat-val">3</span>
+                <span className="h-stat-key">Kelas Penyakit</span>
               </div>
-              <div className="dc-glow" />
+              <div className="h-stat-div" />
+              <div className="h-stat">
+                <span className="h-stat-val">300px</span>
+                <span className="h-stat-key">Resolusi Input</span>
+              </div>
+              <div className="h-stat-div" />
+              <div className="h-stat">
+                <span className="h-stat-val">5 MB</span>
+                <span className="h-stat-key">Maks. Ukuran</span>
+              </div>
             </div>
-          ))}
+            <div className="hero-actions">
+              <a href="#scan" className="btn-hero">
+                Mulai Analisis
+                <ArrowRight size={16} />
+              </a>
+              <a href="#penyakit" className="btn-ghost">
+                Lihat Kelas
+                <ChevronRight size={15} />
+              </a>
+            </div>
+          </div>
+          <HeroVisual />
         </div>
       </section>
 
-      {/* ── Upload & Results ── */}
-      <section className="scan-section" id="scan">
-        <div className="section-eyebrow">Analisis Gambar</div>
-        <h2 className="section-h2">Upload Foto Daun Kentang</h2>
+      {/* ── Tech Strip ── */}
+      <div className="tech-strip">
+        {['EfficientNet-B0', 'ONNX Runtime', 'Node.js', 'React 19', 'Vercel Edge', 'TensorFlow'].map((t, i) => (
+          <div key={t} className="tech-item">
+            {i > 0 && <span className="tech-dot" />}
+            <span>{t}</span>
+          </div>
+        ))}
+      </div>
 
-        <div className="scan-layout">
-          {/* Left: upload */}
-          <div className="upload-col">
-            <div
-              className={`dropzone ${dragging ? 'dragging' : ''} ${preview ? 'has-file' : ''}`}
-              onDrop={onDrop}
-              onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
-              onDragLeave={() => setDragging(false)}
-              onClick={() => !preview && fileRef.current?.click()}
-            >
-              {preview ? (
-                <div className="file-preview">
-                  <img src={preview} alt="Preview daun" />
-                  <div className="preview-overlay">
-                    <button className="change-file-btn" onClick={(e) => { e.stopPropagation(); reset() }}>
-                      <RefreshCw size={15} /> Ganti Gambar
-                    </button>
+      {/* ── Disease Cards ── */}
+      <section className="diseases-section" id="penyakit">
+        <div className="section-inner">
+          <div className="section-label">Kelas yang Dapat Dideteksi</div>
+          <h2 className="section-h2">Tiga Kondisi Daun Kentang</h2>
+          <p className="section-sub">
+            Model dilatih untuk mengenali tiga kondisi utama daun kentang dengan akurasi tinggi menggunakan dataset PlantVillage.
+          </p>
+          <div className="disease-grid">
+            {Object.entries(DISEASE_CONFIG).map(([key, d]) => {
+              const Icon = d.Icon
+              return (
+                <div
+                  key={key}
+                  className="disease-card"
+                  style={{ '--dc': d.color, '--dc-bg': d.bg, '--dc-border': d.border, '--dc-glow': d.glow }}
+                >
+                  <div className="dc-accent-bar" />
+                  <div className="dc-icon">
+                    <Icon size={22} />
+                  </div>
+                  <h3 className="dc-name">{key}</h3>
+                  <span className="dc-label">{d.label}</span>
+                  <p className="dc-desc">{d.desc}</p>
+                  <div className="dc-action">
+                    <Activity size={13} className="dc-action-icon" />
+                    <span>{d.action}</span>
                   </div>
                 </div>
-              ) : (
-                <div className="dz-idle">
-                  <div className="dz-icon-wrap">
-                    <CloudUpload size={36} />
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Scan Section ── */}
+      <section className="scan-section" id="scan">
+        <div className="section-inner">
+          <div className="section-label">Analisis Gambar</div>
+          <h2 className="section-h2">Upload & Diagnosa Sekarang</h2>
+          <p className="section-sub">
+            Upload foto daun kentang dalam format JPG atau PNG, lalu klik Analisis untuk mendapatkan diagnosis instan dari model AI.
+          </p>
+
+          <div className="scan-grid">
+            {/* ─ Upload Panel ─ */}
+            <div className="scan-panel">
+              <div className="panel-header">
+                <div className="panel-icon"><CloudUpload size={15} /></div>
+                <span>Upload Gambar</span>
+              </div>
+
+              <div
+                className={`dropzone ${dragging ? 'dragging' : ''} ${preview ? 'has-file' : ''}`}
+                onDrop={onDrop}
+                onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+                onDragLeave={() => setDragging(false)}
+                onClick={() => !preview && fileRef.current?.click()}
+              >
+                {preview ? (
+                  <div className="file-preview">
+                    <img src={preview} alt="Preview daun" />
+                    <div className="preview-overlay">
+                      <button className="change-btn" onClick={(e) => { e.stopPropagation(); reset() }}>
+                        <RefreshCw size={14} /> Ganti Gambar
+                      </button>
+                    </div>
                   </div>
-                  <p className="dz-title">{dragging ? 'Lepaskan gambar di sini' : 'Drag & Drop gambar'}</p>
-                  <p className="dz-sub">atau <span className="dz-browse">klik untuk browse</span></p>
-                  <div className="dz-formats">
-                    <span>JPG</span><span>PNG</span><span>Max 5 MB</span>
+                ) : (
+                  <div className="dz-idle">
+                    <div className="dz-icon"><CloudUpload size={30} /></div>
+                    <p className="dz-title">{dragging ? 'Lepaskan gambar di sini' : 'Drag & Drop gambar'}</p>
+                    <p className="dz-sub">atau <span className="dz-browse">klik untuk browse</span></p>
+                    <div className="dz-tags">
+                      <span className="dz-tag">JPG</span>
+                      <span className="dz-tag">PNG</span>
+                      <span className="dz-tag">Max 5 MB</span>
+                    </div>
                   </div>
+                )}
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  style={{ display: 'none' }}
+                  onChange={(e) => handleFile(e.target.files[0])}
+                />
+              </div>
+
+              {error && (
+                <div className="error-msg">
+                  <XCircle size={15} />
+                  <span>{error}</span>
                 </div>
               )}
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/jpeg,image/png"
-                style={{ display: 'none' }}
-                onChange={(e) => handleFile(e.target.files[0])}
-              />
+
+              {file && !loading && (
+                <button className="analyze-btn" onClick={predict}>
+                  <FlaskConical size={16} />
+                  Analisis Sekarang
+                </button>
+              )}
+
+              {loading && (
+                <button className="analyze-btn is-loading" disabled>
+                  <div className="btn-spinner" />
+                  Menganalisis…
+                </button>
+              )}
+
+              <div className="upload-info">
+                <div className="uinfo-item"><Cpu size={13} /><span>EfficientNet-B0 · ONNX</span></div>
+                <div className="uinfo-item"><Shield size={13} /><span>File tidak disimpan</span></div>
+              </div>
             </div>
 
-            {error && (
-              <div className="error-banner">
-                <XCircle size={15} />
-                <span>{error}</span>
+            {/* ─ Result Panel ─ */}
+            <div ref={resultRef} className="scan-panel result-panel">
+              <div className="panel-header">
+                <div className="panel-icon result-panel-icon"><FlaskConical size={15} /></div>
+                <span>Hasil Analisis</span>
               </div>
-            )}
 
-            {file && !loading && (
-              <button className="analyze-btn" onClick={predict}>
-                <FlaskConical size={17} />
-                Analisis Sekarang
-              </button>
-            )}
-
-            {loading && (
-              <button className="analyze-btn loading" disabled>
-                <div className="btn-spinner" />
-                Menganalisis…
-              </button>
-            )}
-          </div>
-
-          {/* Right: results */}
-          <div ref={resultRef} className={`result-col ${result || loading ? 'visible' : ''}`}>
-            {loading && (
-              <div className="result-loading">
-                <div className="pulse-bars">
-                  {[...Array(9)].map((_, i) => (
-                    <div key={i} className="pb" style={{ animationDelay: `${i * 0.09}s` }} />
-                  ))}
+              {!result && !loading && (
+                <div className="result-empty">
+                  <FileImage size={48} />
+                  <p>Hasil analisis akan muncul di sini</p>
+                  <span>Upload gambar daun dan klik Analisis</span>
                 </div>
-                <p className="loading-txt">Model menganalisis gambar…</p>
-                <span className="loading-sub">EfficientNet sedang bekerja</span>
-              </div>
-            )}
+              )}
 
-            {result && cfg && !loading && (
-              <div className="result-card" style={{ '--rc': cfg.color, '--rg': cfg.glow, '--rb': cfg.bg, '--rbr': cfg.border }}>
-                <div className="result-header">
-                  <div className="result-emoji">{cfg.emoji}</div>
-                  <div className="result-meta">
-                    <span className="result-class">{result.class}</span>
-                    <span className="result-label-txt">{cfg.label}</span>
+              {loading && (
+                <div className="result-loading">
+                  <div className="pulse-bars">
+                    {[...Array(9)].map((_, i) => (
+                      <div key={i} className="pb" style={{ animationDelay: `${i * 0.09}s` }} />
+                    ))}
                   </div>
-                  <div className="result-conf-badge">
-                    <span className="rcb-val">{result.confidence}</span>
-                    <span className="rcb-key">confidence</span>
+                  <p className="loading-txt">Model menganalisis gambar…</p>
+                  <span className="loading-sub">EfficientNet sedang bekerja</span>
+                </div>
+              )}
+
+              {result && cfg && !loading && (
+                <div
+                  className="result-card"
+                  style={{ '--rc': cfg.color, '--rc-bg': cfg.bg, '--rc-border': cfg.border, '--rc-glow': cfg.glow }}
+                >
+                  <div className="rc-top">
+                    <div className="rc-icon">
+                      <cfg.Icon size={22} />
+                    </div>
+                    <div className="rc-meta">
+                      <span className="rc-class">{result.class}</span>
+                      <span className="rc-sublabel">{cfg.label}</span>
+                    </div>
+                    <div className="rc-badge">
+                      <span className="rcb-val">{result.confidence}</span>
+                      <span className="rcb-key">confidence</span>
+                    </div>
                   </div>
+
+                  <p className="rc-desc">{cfg.desc}</p>
+
+                  <div className="rc-action">
+                    <Activity size={13} className="rc-action-icon" />
+                    <span>{cfg.action}</span>
+                  </div>
+
+                  <div className="rc-bars">
+                    <div className="bars-title">Distribusi Prediksi</div>
+                    {Object.entries(result.all_predictions).map(([cls, val]) => (
+                      <ConfidenceBar
+                        key={cls}
+                        label={cls}
+                        value={val}
+                        color={DISEASE_CONFIG[cls]?.color || '#aaa'}
+                        isTop={cls === result.class}
+                      />
+                    ))}
+                  </div>
+
+                  <button className="rescan-btn" onClick={reset}>
+                    <RefreshCw size={14} /> Scan Baru
+                  </button>
                 </div>
-
-                <p className="result-desc-txt">{cfg.desc}</p>
-
-                <div className="result-action">
-                  <Activity size={13} />
-                  {cfg.action}
-                </div>
-
-                <div className="result-bars">
-                  <h4 className="bars-title">Distribusi Prediksi</h4>
-                  {Object.entries(result.all_predictions).map(([cls, val]) => (
-                    <ConfidenceBar
-                      key={cls}
-                      label={cls}
-                      value={val}
-                      color={DISEASE_CONFIG[cls]?.color || '#aaa'}
-                      isTop={cls === result.class}
-                    />
-                  ))}
-                </div>
-
-                <button className="new-scan-btn" onClick={reset}>
-                  <RefreshCw size={14} /> Scan Baru
-                </button>
-              </div>
-            )}
-
-            {!result && !loading && (
-              <div className="result-empty">
-                <FileImage size={52} />
-                <p>Hasil analisis akan muncul di sini</p>
-                <span>Upload gambar daun dan klik Analisis</span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -403,11 +513,13 @@ export default function App() {
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-brand">
-            <Leaf size={15} />
+            <div className="logo-icon"><Leaf size={14} /></div>
             <span>TaterScan</span>
           </div>
-          <p>Potato Disease Detection · EfficientNet + ONNX Runtime · Vercel Serverless</p>
-          <code className="footer-url">{API_BASE}</code>
+          <p className="footer-copy">Potato Disease Detection · EfficientNet + ONNX Runtime · Vercel Serverless</p>
+          <div className="footer-right">
+            <StatusBadge status={apiStatus} />
+          </div>
         </div>
       </footer>
     </div>
