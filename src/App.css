@@ -124,8 +124,30 @@ code { font-family: var(--mono) }
   font-size: 13px;
   color: var(--text-2);
   transition: color 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .nav-link:hover { color: var(--green) }
+.nav-link-active { color: var(--green) !important }
+.nav-link-dataset {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  transition: all 0.2s;
+}
+.nav-link-dataset:hover,
+.nav-link-dataset.nav-link-active {
+  border-color: rgba(74, 222, 128, 0.35);
+  background: var(--green-dim);
+  color: var(--green);
+}
 
 /* ── Health indicator ── */
 .health-indicator {

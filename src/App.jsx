@@ -2,9 +2,10 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import {
   Leaf, Zap, Microscope, CloudUpload, FlaskConical,
   RefreshCw, FileImage, XCircle,
-  Activity, Wifi, WifiOff, Loader
+  Activity, Wifi, WifiOff, Loader, Database
 } from 'lucide-react'
 import './App.css'
+import DatasetPage from './DatasetPage'
 
 const API_BASE = 'https://node-js-potato-be-e7k2.vercel.app'
 
@@ -108,6 +109,7 @@ function ScanRings() {
 /* ─── Main App ─── */
 
 export default function App() {
+  const [page, setPage] = useState('home')
   const [apiStatus, setApiStatus] = useState('checking')
   const [dragging, setDragging] = useState(false)
   const [file, setFile] = useState(null)
@@ -117,6 +119,7 @@ export default function App() {
   const [error, setError] = useState(null)
   const fileRef = useRef()
   const resultRef = useRef()
+  const scanRef = useRef()
 
   /* Health check */
   useEffect(() => {
@@ -176,6 +179,18 @@ export default function App() {
     setError(null)
   }
 
+  /* Load dataset image for testing */
+  const handleTestImage = (file, previewUrl) => {
+    setError(null)
+    setResult(null)
+    setFile(file)
+    setPreview(previewUrl)
+    setPage('home')
+    setTimeout(() => {
+      scanRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 120)
+  }
+
   const cfg = result ? DISEASE_CONFIG[result.class] : null
 
   return (
@@ -197,10 +212,28 @@ export default function App() {
           </div>
           <nav className="header-nav">
             <HealthIndicator status={apiStatus} />
-            <a href="#scan" className="nav-link">Deteksi</a>
+            <button
+              className={`nav-link ${page === 'home' ? 'nav-link-active' : ''}`}
+              onClick={() => setPage('home')}
+            >
+              Deteksi
+            </button>
+            <button
+              className={`nav-link nav-link-dataset ${page === 'dataset' ? 'nav-link-active' : ''}`}
+              onClick={() => setPage('dataset')}
+            >
+              <Database size={13} />
+              Dataset
+            </button>
           </nav>
         </div>
       </header>
+
+      {/* ── Dataset Page ── */}
+      {page === 'dataset' && <DatasetPage onTestImage={handleTestImage} />}
+
+      {/* ── Home Content ── */}
+      {page === 'home' && <>
 
       {/* ── Hero ── */}
       <section className="hero">
@@ -268,7 +301,7 @@ export default function App() {
       </section>
 
       {/* ── Upload & Results ── */}
-      <section className="scan-section" id="scan">
+      <section className="scan-section" id="scan" ref={scanRef}>
         <div className="section-eyebrow">Analisis Gambar</div>
         <h2 className="section-h2">Upload Foto Daun Kentang</h2>
 
@@ -410,6 +443,8 @@ export default function App() {
           <code className="footer-url">{API_BASE}</code>
         </div>
       </footer>
+
+      </>}
     </div>
   )
 }
